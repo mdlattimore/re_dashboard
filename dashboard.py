@@ -30,6 +30,9 @@ def cached_get_current_gas_price():
 def cached_get_current_cost_of_eggs():
     return get_current_cost_of_eggs()
 
+st.set_page_config(page_title="RE Dashboard")
+
+
 st.markdown("""
     <style>
         .block-container {
