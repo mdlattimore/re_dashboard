@@ -5,9 +5,4 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = []
 
-[tool.poetry]
-name = "re-dashboard"
-version = "0.1.0"
 
-[tool.poetry.package-mode]
-enabled = false
