@@ -1,8 +1,23 @@
 import os
 import requests
 from datetime import date
+from dotenv import load_dotenv
+import streamlit as st
 
-key = os.environ.get("FRED_KEY")
+# Load local .env only if it exists (i.e., you're not in Streamlit Cloud)
+load_dotenv()
+
+error_occurred = None
+def get_key(key_name):
+    try:
+        return st.secrets[key_name]
+    except st.errors.StreamlitSecretNotFoundError:
+        return os.getenv(key_name)
+
+
+
+key = get_key("FRED_API_KEY")
+
 
 # To get start and end observation dates, create today date object; create
 # end_date object by changing today.day to 01; create start_date object by
