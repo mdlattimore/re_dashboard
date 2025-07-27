@@ -3,12 +3,17 @@ import requests
 from datetime import date
 from dotenv import load_dotenv
 import streamlit as st
+from typing import Optional
+
 
 # Load local .env only if it exists (i.e., you're not in Streamlit Cloud)
 load_dotenv()
 
-error_occurred = None
-def get_key(key_name):
+def get_key(key_name: str) -> Optional[str]:
+    """Function to get a key from an environment variable.
+    First checks for key in st.secrets (key location in production
+    environment). If that fails, fetches from local .env file. Can
+    use app in local or production without changing code."""
     try:
         return st.secrets[key_name]
     except st.errors.StreamlitSecretNotFoundError:

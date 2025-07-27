@@ -7,6 +7,8 @@ from get_econ_data import get_current_inflation_rate, \
     get_current_cost_of_eggs
 from mtg_pmt_calculator import calculate_payment
 from mtg_payoff_calculator import calculate_mortgage_payoff
+from property_tax_calculator import calculate_property_tax
+from title_insurance_estimator import estimate_title_insurance
 
 # ---------- Cached API wrappers ----------
 
@@ -85,8 +87,8 @@ with col6:
 
 st.subheader("Calculators")
 
-tab1, tab2, tab3 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
-                                  "Property Tax"])
+tab1, tab2, tab3, tab4 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
+                                  "Property Tax", "Closing Costs (Title)"])
 with tab1:
     st.write("Mortgage Payment Calculator")
 
@@ -153,6 +155,76 @@ with tab2:
         st.write(f"#### Total Payoff: ${total_payoff:,.2f}")
 
 with tab3:
-    st.write("Property Tax")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        assessed_value = st.text_input("Assessed Value", value="0")
+        assessed_value = float(assessed_value)
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        millage_rate = st.text_input("Millage Rate", value="0")
+        millage_rate = float(millage_rate)
+    col7, col8, col9 = st.columns(3)
+    with col7:
+        fees = st.text_input("Fees", value="0")
+        fees = float(fees)
+    if st.button("Estimate Property Tax"):
+        total = calculate_property_tax(assessed_value, millage_rate, fees)
+        st.write(f"Property Tax Estimate: ${total:,.2f}")
+
+with (((((tab4))))):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        purchase_price = st.text_input("Purchase Price", value="0")
+        purchase_price = float(purchase_price)
+    with col2:
+        loan_amount = st.text_input("Loan Amount", value="0")
+        loan_amount = float(loan_amount)
+    with col3:
+        number_of_endorsements = st.text_input("Number of endorsements", value="0")
+        number_of_endorsements = int(number_of_endorsements)
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        settlement_fee = st.text_input("Settlement Fee", value="865")
+        settlement_fee = float(settlement_fee)
+    with col5:
+        title_search = st.text_input("Title Search", value="225")
+        title_search = float(title_search)
+    with col6:
+        courier_wire = st.text_input("Courier/Wire", value="95")
+        courier_wire = float(courier_wire)
+    col7, col8, col9 = st.columns(3)
+    with col7:
+        if loan_amount and purchase_price:
+            recording_fee = 90
+            e_recording_fee = 10
+        elif purchase_price:
+            recording_fee = 26
+            e_recording_fee = 5
+        else:
+            recording_fee = 64
+            e_recording_fee = 5
+
+    if st.button("Estimate Title Closing Costs"):
+
+        title_insurance = estimate_title_insurance(purchase_price,
+                                                   loan_amount, number_of_endorsements)
+        total_closing_costs = settlement_fee + title_search + courier_wire \
+        + recording_fee + e_recording_fee + title_insurance
+
+        st.write(f"Purchase price: ${purchase_price:,.2f}")
+        st.write(f"Loan Amount: ${loan_amount:,.2f}")
+        st.write(f"Settlement Fee: ${settlement_fee:,.2f}")
+        st.write(f"Title Search: ${title_search:,.2f}")
+        st.write(f"Courier Wire: ${courier_wire:,.2f}")
+        st.write(f"Title Insurance: ${title_insurance:,.2f}")
+        st.write(f"Recording Fee: ${recording_fee:,.2f}")
+        st.write(f"E-Recording Fee: ${e_recording_fee:,.2f}")
+
+        st.write(f"#### Total Title Closing Costs: ${total_closing_costs:,.2f}")
+
+        st.caption("Default Assumes: CPL only on loans, recording one deed on "
+                   "cash transactions, recording one deed and one deed of "
+                   "trust on financed transactions, 8.1 and 9 endorsements on "
+                   "loan policies.")
 
 
