@@ -113,24 +113,24 @@ def get_current_gas_price():
     return data["observations"][-1]["value"], data["observations"][-1]["date"]
 
 
-def get_current_cost_of_eggs():
-    today = date.today()
-    end_date = today
-    start_date = date.fromisoformat(f"{end_date.year - 1}-{str(end_date.month).zfill(2)}-01")
-    end_date = str(end_date)
-    start_date = str(start_date)
-
-    # FRED Egg Price Endpoint
-    url = (
-        f"https://api.stlouisfed.org/fred/series/observations?series_id"
-        f"=APU0000708111&api_key={key}&file_type=json&observation_start"
-        f"={start_date}&observation_end={end_date}"
-    )
-
-    response = requests.get(url)
-    data = response.json()
-
-    return data["observations"][-1]["value"], data["observations"][-1]["date"]
+# def get_current_cost_of_eggs():
+#     today = date.today()
+#     end_date = today
+#     start_date = date.fromisoformat(f"{end_date.year - 1}-{str(end_date.month).zfill(2)}-01")
+#     end_date = str(end_date)
+#     start_date = str(start_date)
+#
+#     # FRED Egg Price Endpoint
+#     url = (
+#         f"https://api.stlouisfed.org/fred/series/observations?series_id"
+#         f"=APU0000708111&api_key={key}&file_type=json&observation_start"
+#         f"={start_date}&observation_end={end_date}"
+#     )
+#
+#     response = requests.get(url)
+#     data = response.json()
+#
+#     return data["observations"][-1]["value"], data["observations"][-1]["date"]
 
 
 def get_current_thirty_year_conventional_mortgage_rate():
@@ -152,6 +152,24 @@ def get_current_thirty_year_conventional_mortgage_rate():
 
     return data["observations"][-1]["value"], data["observations"][-1]["date"]
 
+def get_current_fifteen_year_conventional_mortgage_rate():
+    today = date.today()
+    end_date = today
+    start_date = date.fromisoformat(f"{end_date.year - 1}-{str(end_date.month).zfill(2)}-01")
+    end_date = str(end_date)
+    start_date = str(start_date)
+
+    # FRED Thirty Year Conventional Mortgage Endpoint
+    url = (
+        f"https://api.stlouisfed.org/fred/series/observations?series_id"
+        f"=MORTGAGE15US&api_key={key}&file_type=json&observation_start"
+        f"={start_date}&observation_end={end_date}"
+    )
+
+    response = requests.get(url)
+    data = response.json()
+
+    return data["observations"][-1]["value"], data["observations"][-1]["date"]
 
 if __name__ == "__main__":
     print(get_current_thirty_year_conventional_mortgage_rate())

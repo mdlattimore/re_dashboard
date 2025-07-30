@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from get_econ_data import get_current_inflation_rate, \
     get_current_thirty_year_conventional_mortgage_rate, \
     get_current_unemployment_rate, get_current_gas_price, \
-    get_current_cost_of_eggs
+    get_current_fifteen_year_conventional_mortgage_rate
 from mtg_pmt_calculator import calculate_payment
 from mtg_payoff_calculator import calculate_mortgage_payoff
 from property_tax_calculator import calculate_property_tax
@@ -29,8 +29,8 @@ def cached_get_current_gas_price():
     return get_current_gas_price()
 
 @st.cache_data(ttl=3600)
-def cached_get_current_cost_of_eggs():
-    return get_current_cost_of_eggs()
+def cached_get_current_fifteen_year_conventional_mortgage_rate():
+    return get_current_fifteen_year_conventional_mortgage_rate()
 
 st.set_page_config(page_title="RE Dashboard")
 
@@ -52,20 +52,22 @@ st.header("RE Dashboard")
 
 col1, col2, col3 = st.columns(3)
 
+
+
+
 with col1:
-    now = dt.now()
-    st.write("#### Today")
-    st.write(now.date().__str__())
-
-
-with col2:
     inflation = cached_get_current_inflation_rate()
     st.write("#### Inflation")
     st.write(f"{inflation[0]}% ({inflation[1]})")
 
-with col3:
+with col2:
     st.write("#### Conv 30 Yr Rate")
     rate = cached_get_current_thirty_year_conventional_mortgage_rate()
+    st.write(f"{rate[0]}% ({rate[1]})")
+
+with col3:
+    st.write("#### Conv 15 Yr Rate")
+    rate = cached_get_current_fifteen_year_conventional_mortgage_rate()
     st.write(f"{rate[0]}% ({rate[1]})")
 
 col4, col5, col6 = st.columns(3)
@@ -81,9 +83,7 @@ with col5:
     st.write(f"${gas_price[0]} ({gas_price[1]})")
 
 with col6:
-    st.write("#### Eggs")
-    egg_price = cached_get_current_cost_of_eggs()
-    st.write(f"${egg_price[0]} ({egg_price[1]})")
+    st.write("#### Place Holder")
 
 st.subheader("Calculators")
 
@@ -171,7 +171,7 @@ with tab3:
         total = calculate_property_tax(assessed_value, millage_rate, fees)
         st.write(f"Property Tax Estimate: ${total:,.2f}")
 
-with (((((tab4))))):
+with tab4:
     col1, col2, col3 = st.columns(3)
     with col1:
         purchase_price = st.text_input("Purchase Price", value="0")
