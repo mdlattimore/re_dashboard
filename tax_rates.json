@@ -1,0 +1,30 @@
+{
+  "Mecklenburg": {
+    "county": 0.4927,
+    "cities": {
+      "Charlotte": 0.2741,
+      "Cornelius": 0.1731,
+      "Davidson": 0.2660,
+      "Huntersville": 0.2275,
+      "Matthews": 0.2795,
+      "Mint Hill": 0.2250,
+      "Pineville": 0.3000,
+      "Stallings": 0.1890
+    }
+  },
+  "Union": {
+    "county": 0.763,
+    "cities": {
+      "Monroe": 0.223,
+      "Waxhaw": 0.112
+    }
+  },
+  "Gaston": {
+    "county": 0.332,
+    "cities": {
+      "Gastonia": 0.233,
+      "Denver": 0.112
+    }
+  }
+
+}

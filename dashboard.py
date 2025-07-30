@@ -1,14 +1,16 @@
+import json
+
 import streamlit as st
-import requests
-from datetime import datetime as dt
+
 from get_econ_data import get_current_inflation_rate, \
     get_current_thirty_year_conventional_mortgage_rate, \
     get_current_unemployment_rate, get_current_gas_price, \
     get_current_fifteen_year_conventional_mortgage_rate
-from mtg_pmt_calculator import calculate_payment
 from mtg_payoff_calculator import calculate_mortgage_payoff
+from mtg_pmt_calculator import calculate_payment
 from property_tax_calculator import calculate_property_tax
 from title_insurance_estimator import estimate_title_insurance
+
 
 # ---------- Cached API wrappers ----------
 
@@ -16,24 +18,28 @@ from title_insurance_estimator import estimate_title_insurance
 def cached_get_current_inflation_rate():
     return get_current_inflation_rate()
 
+
 @st.cache_data(ttl=3600)
 def cached_get_current_thirty_year_conventional_mortgage_rate():
     return get_current_thirty_year_conventional_mortgage_rate()
+
 
 @st.cache_data(ttl=3600)
 def cached_get_current_unemployment_rate():
     return get_current_unemployment_rate()
 
+
 @st.cache_data(ttl=3600)
 def cached_get_current_gas_price():
     return get_current_gas_price()
+
 
 @st.cache_data(ttl=3600)
 def cached_get_current_fifteen_year_conventional_mortgage_rate():
     return get_current_fifteen_year_conventional_mortgage_rate()
 
-st.set_page_config(page_title="RE Dashboard")
 
+st.set_page_config(page_title="RE Dashboard")
 
 st.markdown("""
     <style>
@@ -46,14 +52,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
 st.header("RE Dashboard")
 
 col1, col2, col3 = st.columns(3)
-
-
-
 
 with col1:
     inflation = cached_get_current_inflation_rate()
@@ -85,10 +86,13 @@ with col5:
 with col6:
     st.write("#### Place Holder")
 
+# CALCULATORS
 st.subheader("Calculators")
 
 tab1, tab2, tab3, tab4 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
-                                  "Property Tax", "Closing Costs (Title)"])
+                                     "Property Tax", "Closing Costs (Title)"])
+
+# Mortgage payment calculator
 with tab1:
     st.write("Mortgage Payment Calculator")
 
@@ -124,22 +128,24 @@ with tab1:
 
         except ValueError:
             st.error("Please enter valid numeric values for all fields.")
+
+# Mortgage Payoff Calculator
 with tab2:
     st.write("Mortgage Payoff Calculator")
 
-    col1, col2 =st.columns(2)
+    col1, col2 = st.columns(2)
     with col1:
         principal_balance = st.text_input("Principal balance", value="0")
         p = float(principal_balance)
     with col2:
         principal_as_of_date = st.date_input("As of", key="dt1")
-    col3, col4 =st.columns(2)
+    col3, col4 = st.columns(2)
     with col3:
         interest_rate = st.text_input("Interest rate", value="0")
         n = float(interest_rate)
     with col4:
         good_through_date = st.date_input("Good through", key="dt2")
-    col5, col6, col7, col8 =st.columns(4)
+    col5, col6, col7, col8 = st.columns(4)
     with col5:
         accrual_basis = st.selectbox("Accrual Basis", [365, 366, 360])
     if st.button("Calculate Payoff"):
@@ -154,23 +160,68 @@ with tab2:
                  f"\${total_interest:.2f})")
         st.write(f"#### Total Payoff: ${total_payoff:,.2f}")
 
+# Property Tax Estimator
 with tab3:
     col1, col2, col3 = st.columns(3)
     with col1:
         assessed_value = st.text_input("Assessed Value", value="0")
         assessed_value = float(assessed_value)
     col4, col5, col6 = st.columns(3)
+    # with col4:
+    #     with open("tax_rates.json", "r") as file:
+    #         counties = json.load(file)
+    #     county_select = st.selectbox("County", [county for county in counties])
+    #     city = st.checkbox("City")
+    #     if city:
+    #         city_select = st.selectbox("City", [city for city in counties[
+    #             county_select]["cities"]])
     with col4:
-        millage_rate = st.text_input("Millage Rate", value="0")
-        millage_rate = float(millage_rate)
+        with open("tax_rates.json", "r") as file:
+            counties = json.load(file)
+        county_select = st.selectbox("County", [county for county in counties])
+        city = st.checkbox("City")
+        if city:
+            city_select = st.selectbox("City", [city for city in
+                counties[county_select]["cities"]])
+        else:
+            # Spacer to align with city_millage_rate in col5
+            st.markdown("<div style='height: 38px'></div>",
+                        unsafe_allow_html=True)
+
+    with col5:
+        default_county_rate = counties[county_select]["county"]
+        county_millage_rate = st.text_input("County Millage Rate",
+                                            value=default_county_rate)
+        county_millage_rate = float(county_millage_rate)
+        if city:
+            st.markdown("<div style='height: 38px'></div>",
+                        unsafe_allow_html=True)
+            default_city_rate = counties[county_select]["cities"][city_select]
+            city_millage_rate = st.text_input("City Millage Rate",
+                                              value=default_city_rate)
+            city_millage_rate = float(city_millage_rate)
+            combined = st.checkbox("Combine County and City Tax")
+
     col7, col8, col9 = st.columns(3)
     with col7:
         fees = st.text_input("Fees", value="0")
         fees = float(fees)
     if st.button("Estimate Property Tax"):
-        total = calculate_property_tax(assessed_value, millage_rate, fees)
-        st.write(f"Property Tax Estimate: ${total:,.2f}")
+        county_tax = calculate_property_tax(assessed_value,
+                                            county_millage_rate, fees)
+        if city:
+            city_tax = calculate_property_tax(assessed_value,
+                                             city_millage_rate,
+                                       0)
+            if combined:
+                st.write(f"Property Tax Estimate: ${county_tax + city_tax:,.2f}")
+            else:
+                st.write(f"City Property Tax Estimate: ${city_tax:,.2f}")
+                st.write(f"County Property Tax Estimate: ${county_tax:,.2f}")
+        else:
+            st.write(f"Property Tax Estimate: ${county_tax:,.2f}")
 
+# Closing Cost (Title) Estimator
 with tab4:
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -180,7 +231,8 @@ with tab4:
         loan_amount = st.text_input("Loan Amount", value="0")
         loan_amount = float(loan_amount)
     with col3:
-        number_of_endorsements = st.text_input("Number of endorsements", value="0")
+        number_of_endorsements = st.text_input("Number of endorsements",
+                                               value="0")
         number_of_endorsements = int(number_of_endorsements)
     col4, col5, col6 = st.columns(3)
     with col4:
@@ -205,11 +257,11 @@ with tab4:
             e_recording_fee = 5
 
     if st.button("Estimate Title Closing Costs"):
-
         title_insurance = estimate_title_insurance(purchase_price,
-                                                   loan_amount, number_of_endorsements)
+                                                   loan_amount,
+                                                   number_of_endorsements)
         total_closing_costs = settlement_fee + title_search + courier_wire \
-        + recording_fee + e_recording_fee + title_insurance
+                              + recording_fee + e_recording_fee + title_insurance
 
         st.write(f"Purchase price: ${purchase_price:,.2f}")
         st.write(f"Loan Amount: ${loan_amount:,.2f}")
@@ -226,5 +278,3 @@ with tab4:
                    "cash transactions, recording one deed and one deed of "
                    "trust on financed transactions, 8.1 and 9 endorsements on "
                    "loan policies.")
-
-
