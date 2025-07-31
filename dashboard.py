@@ -182,7 +182,7 @@ with tab1:
         st.markdown(f"Monthly insurance escrow: ${st.session_state['i'] / 12:.2f}")
         st.markdown(f"Total monthly payment: ${st.session_state['pi_payment'] + (st.session_state['t'] / 12) + (st.session_state['i'] / 12):.2f}")
 
-        display_amortization = st.checkbox("Display Amortization")
+        display_amortization = st.checkbox("Show Amortization Table")
         if display_amortization:
             df = pd.DataFrame(st.session_state['am_table'], columns=["Month",
                 "Payment", "Interest", "Principal", "Balance"])
