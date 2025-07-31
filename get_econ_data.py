@@ -47,6 +47,7 @@ def get_current_inflation_rate():
     )
 
     response = requests.get(url)
+    print("New Inflation Call")
     data = response.json()
     # pprint(data)
     # set end_value to the last available value by using [-1] slice on the results;
@@ -74,6 +75,7 @@ def get_current_unemployment_rate():
     )
 
     response = requests.get(url)
+    print("New Unemployment Call")
     data = response.json()
     # pprint(data)
     # set end_value to the last available value by using [-1] slice on the results;
@@ -102,6 +104,7 @@ def get_current_gas_price():
     )
 
     response = requests.get(url)
+    print("New Gas Price Call")
     data = response.json()
     # pprint(data)
     # set end_value to the last available value by using [-1] slice on the results;
@@ -148,6 +151,7 @@ def get_current_thirty_year_conventional_mortgage_rate():
     )
 
     response = requests.get(url)
+    print("New Thirty Year Conventional Mortgage Rate Call")
     data = response.json()
 
     return data["observations"][-1]["value"], data["observations"][-1]["date"]
@@ -167,6 +171,7 @@ def get_current_fifteen_year_conventional_mortgage_rate():
     )
 
     response = requests.get(url)
+    print("New Fifte Year Conventional Mortgage Rate Call")
     data = response.json()
 
     return data["observations"][-1]["value"], data["observations"][-1]["date"]

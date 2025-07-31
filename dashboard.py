@@ -10,6 +10,8 @@ from mtg_payoff_calculator import calculate_mortgage_payoff
 from mtg_pmt_calculator import calculate_payment
 from property_tax_calculator import calculate_property_tax
 from title_insurance_estimator import estimate_title_insurance
+from amortization_function import amortization
+import pandas as pd
 
 
 # ---------- Cached API wrappers ----------
@@ -93,6 +95,46 @@ tab1, tab2, tab3, tab4 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
                                      "Property Tax", "Closing Costs (Title)"])
 
 # Mortgage payment calculator
+# with tab1:
+#     st.write("Mortgage Payment Calculator")
+#
+#     # Get raw string inputs
+#     col1, col2, col3 = st.columns(3)
+#     with col1:
+#         p_input = st.text_input("Principal amount of loan")
+#     with col2:
+#         r_input = st.text_input("Interest rate (annual)")
+#     with col3:
+#         n_input = st.text_input("Term of loan (in months)")
+#     col4, col5, col6 = st.columns(3)
+#     with col4:
+#         t_input = st.text_input("Annual taxes", value="0")
+#     with col5:
+#         i_input = st.text_input("Annual insurance", value="0")
+#
+#     if st.button("Calculate Payment"):
+#         try:
+#             p = float(p_input)
+#             r = float(r_input)
+#             n = int(n_input)
+#             t = float(t_input)
+#             i = float(i_input)
+#
+#             pi_payment = calculate_payment(p, r, n)
+#             st.markdown(f"## Monthly Payment")
+#             st.markdown(f"Principal and interest: ${pi_payment:.2f}")
+#             st.markdown(f"Monthly tax escrow: ${t / 12:.2f}")
+#             st.markdown(f"Monthly insurance escrow: ${i / 12:.2f}")
+#             st.markdown(f"Total monthly payment: ${pi_payment + (t / 12) + (i / 12):.2f}")
+#             am_table = amortization(p, r, n)
+#
+#         except ValueError:
+#             st.error("Please enter valid numeric values for all fields.")
+#
+#         display_amortization = st.checkbox("Display Amortization")
+#         if display_amortization:
+#             st.write(am_table)
+
 with tab1:
     st.write("Mortgage Payment Calculator")
 
@@ -119,15 +161,45 @@ with tab1:
             i = float(i_input)
 
             pi_payment = calculate_payment(p, r, n)
-            st.markdown(f"## Monthly Payment")
-            st.markdown(f"Principal and interest: ${pi_payment:.2f}")
-            st.markdown(f"Monthly tax escrow: ${t / 12:.2f}")
-            st.markdown(f"Monthly insurance escrow: ${i / 12:.2f}")
-            st.markdown(
-                f"Total monthly payment: ${pi_payment + (t / 12) + (i / 12):.2f}")
+            am_table = amortization(p, r, n)
+
+            # Store results in session state
+            st.session_state['pi_payment'] = pi_payment
+            st.session_state['t'] = t
+            st.session_state['i'] = i
+            st.session_state['am_table'] = am_table
+            st.session_state['payment_calculated'] = True
 
         except ValueError:
             st.error("Please enter valid numeric values for all fields.")
+            st.session_state['payment_calculated'] = False
+
+    # Display results if calculated
+    if st.session_state.get('payment_calculated'):
+        st.markdown(f"## Monthly Payment")
+        st.markdown(f"Principal and interest: ${st.session_state['pi_payment']:.2f}")
+        st.markdown(f"Monthly tax escrow: ${st.session_state['t'] / 12:.2f}")
+        st.markdown(f"Monthly insurance escrow: ${st.session_state['i'] / 12:.2f}")
+        st.markdown(f"Total monthly payment: ${st.session_state['pi_payment'] + (st.session_state['t'] / 12) + (st.session_state['i'] / 12):.2f}")
+
+        display_amortization = st.checkbox("Display Amortization")
+        if display_amortization:
+            df = pd.DataFrame(st.session_state['am_table'], columns=["Month",
+                "Payment", "Interest", "Principal", "Balance"])
+            df = df.reset_index(drop=True)  # <- This hides the default index
+
+            df.index = [""] * len(df)
+            st.dataframe(
+                df.style.format({
+                    "Payment": "${:,.2f}",
+                    "Interest": "${:,.2f}",
+                    "Principal": "${:,.2f}",
+                    "Balance": "${:,.2f}"
+                })
+            )
+
+
+
 
 # Mortgage Payoff Calculator
 with tab2:
