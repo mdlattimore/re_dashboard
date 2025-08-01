@@ -12,6 +12,10 @@ from property_tax_calculator import calculate_property_tax
 from title_insurance_estimator import estimate_title_insurance
 from amortization_function import amortization
 import pandas as pd
+from config import (MORTGAGE_PAYMENT_CALCULATOR,
+                    MORTGAGE_PAYOFF_CALCULATOR,
+                    PROPERTY_TAX_CALCULATOR,
+                    CLOSING_COST_ESTIMATOR,)
 
 
 # ---------- Cached API wrappers ----------
@@ -91,13 +95,13 @@ with col6:
 # CALCULATORS
 st.subheader("Calculators")
 
-tab1, tab2, tab3, tab4 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
-                                     "Property Tax", "Closing Costs (Title)"])
+# tab1, tab2, tab3, tab4 = st.tabs(["Mortgage Payment", "Mortgage Payoff",
+#                                      "Property Tax", "Closing Costs (Title)"])
 
 # Mortgage payment calculator
 
-with tab1:
-    st.write("Mortgage Payment Calculator")
+def render_payment_calculator():
+    st.write("Mortgage Payment")
 
     # Get raw string inputs
     col1, col2, col3 = st.columns(3)
@@ -163,8 +167,7 @@ with tab1:
 
 
 # Mortgage Payoff Calculator
-
-with tab2:
+def render_mortgage_payoff_calculator():
     st.write("Mortgage Payoff Calculator")
 
     col1, col2 = st.columns(2)
@@ -195,7 +198,7 @@ with tab2:
         st.write(f"#### Total Payoff: ${total_payoff:,.2f}")
 
 # Property Tax Estimator
-with tab3:
+def render_property_tax_calculator():
     col1, col2, col3 = st.columns(3)
     with col1:
         assessed_value = st.text_input("Assessed Value", value="0")
@@ -256,7 +259,7 @@ with tab3:
             st.write(f"Property Tax Estimate: ${county_tax:,.2f}")
 
 # Closing Cost (Title) Estimator
-with tab4:
+def render_closing_cost_estimator():
     col1, col2, col3 = st.columns(3)
     with col1:
         purchase_price = st.text_input("Purchase Price", value="0")
@@ -312,3 +315,24 @@ with tab4:
                    "cash transactions, recording one deed and one deed of "
                    "trust on financed transactions, 8.1 and 9 endorsements on "
                    "loan policies.")
+
+tabs_to_render = []
+
+if MORTGAGE_PAYMENT_CALCULATOR:
+    tabs_to_render.append(("Mortgage Payment", render_payment_calculator))
+
+if MORTGAGE_PAYOFF_CALCULATOR:
+    tabs_to_render.append(("Mortgage Payoff", render_mortgage_payoff_calculator))
+
+if PROPERTY_TAX_CALCULATOR:
+    tabs_to_render.append(("Property Tax Calculator", render_property_tax_calculator))
+
+if CLOSING_COST_ESTIMATOR:
+    tabs_to_render.append(("Closing Cost Estimate",
+    render_closing_cost_estimator))
+
+tabs = st.tabs([label for label, _ in tabs_to_render])
+
+for tab, (_, render_fn) in zip(tabs, tabs_to_render):
+    with tab:
+        render_fn()
