@@ -52,10 +52,13 @@ def get_current_inflation_rate():
     # pprint(data)
     # set end_value to the last available value by using [-1] slice on the results;
     # set start_value by selecting 12 values back [-13] slice on results
-    start_value = float(data["observations"][-13]["value"])
-    end_value = float(data["observations"][-1]["value"])
-    rate = ((end_value - start_value) / start_value) * 100
-    return f"{rate:.1f}", data["observations"][-1]["date"]
+    try:
+        start_value = float(data["observations"][-13]["value"])
+        end_value = float(data["observations"][-1]["value"])
+        rate = ((end_value - start_value) / start_value) * 100
+        return f"{rate:.1f}", data["observations"][-1]["date"]
+    except ValueError:
+        return "No Data"
 
 
 def get_current_unemployment_rate():
